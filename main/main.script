@@ -1,0 +1,18 @@
+local monarch = require "monarch.monarch"
+
+function init(self)
+	monarch.debug()
+	msg.post(".", "acquire_input_focus")
+	msg.post("#", "show_welcome")
+	monarch.add_listener()
+end
+
+function final(self)
+	monarch.remove_listener()
+end
+
+function on_message(self, message_id, message, sender)
+	if message_id == hash("show_welcome") then
+		monarch.show("welcome")
+	end
+end

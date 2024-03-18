@@ -1,0 +1,51 @@
+local monarch = require "monarch.monarch"
+local transitions = require "monarch.transitions.gui"
+local druid = require("druid.druid")
+
+local function on_button_callback(self)
+    print("Back button clicked!")
+    monarch.back();
+end
+
+function init(self)
+    msg.post(".", "acquire_input_focus")
+    msg.post("#", "init");
+ 
+    self.druid = druid.new(self)
+    
+    local DURATION = 0.3
+    local transition = transitions.create(gui.get_node("root"))
+        .show_in(transitions.slide_in_right, gui.EASING_LINEAR, DURATION, 0)
+        .show_out(transitions.slide_out_left, gui.EASING_LINEAR, DURATION, 0)
+        .back_in(transitions.slide_in_left, gui.EASING_LINEAR, DURATION, 0)
+        .back_out(transitions.slide_out_right, gui.EASING_LINEAR, DURATION, 0)
+
+    monarch.on_transition("home", transition)
+    monarch.add_listener()
+end
+
+function final(self)
+    self.druid:final()
+    monarch.remove_listener()
+end
+
+function update(self, dt)
+    self.druid:update(dt)
+end
+
+function on_message(self, message_id, message, sender)
+    monarch.on_message(message_id, message, sender)
+
+    if message_id == hash("init") then
+        self.button = self.druid:new_button("back/button", on_button_callback)
+    end
+    
+    self.druid:on_message(message_id, message, sender)
+end
+
+function on_input(self, action_id, action)
+    return self.druid:on_input(action_id, action)
+end
+
+function on_reload(self)
+end

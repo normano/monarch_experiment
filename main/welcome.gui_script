@@ -1,0 +1,59 @@
+local transitions = require "monarch.transitions.gui"
+local monarch = require "monarch.monarch"
+local druid = require("druid.druid")
+
+local function on_button_callback(self)
+	print("The button clicked!")
+	monarch.show("home");
+end
+
+function init(self)
+	msg.post(".", "acquire_input_focus")
+	msg.post("#", "init");
+	
+	self.druid = druid.new(self)
+
+	local DURATION = 0.3
+	local transition = transitions.create(gui.get_node("root"))
+		.show_in(transitions.scale_in, gui.EASING_LINEAR, DURATION, 0)
+		.show_out(transitions.scale_out, gui.EASING_LINEAR, DURATION, 0)
+		.back_in(transitions.fade_in, gui.EASING_LINEAR, DURATION, 0)
+		.back_out(transitions.fade_out, gui.EASING_LINEAR, DURATION, 0)
+
+	monarch.on_transition("welcome", transition)
+
+	monarch.on_focus_changed("welcome", function(message_id, message)
+		if message_id == monarch.FOCUS.GAINED then
+			print("welcome gained focus")
+		elseif message_id == monarch.FOCUS.LOST then
+			print("welcome lost focus")
+		end
+	end)
+	monarch.add_listener()
+end
+
+function final(self)
+	self.druid:final()
+	monarch.remove_listener()
+end
+
+function update(self, dt)
+	self.druid:update(dt)
+end
+
+function on_message(self, message_id, message, sender)
+	monarch.on_message(message_id, message, sender)
+	if message_id == hash("init") then
+		self.button = self.druid:new_button("button_1/button", on_button_callback)
+		gui.play_particlefx(gui.get_node("particlefx"))
+	end
+		
+	if message_id == monarch.TRANSITION.SHOW_IN then
+		print("Show in done!")
+	end
+	self.druid:on_message(message_id, message, sender)
+end
+
+function on_input(self, action_id, action)
+	return self.druid:on_input(action_id, action)
+end
